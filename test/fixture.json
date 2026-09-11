@@ -1,0 +1,37 @@
+{
+  "at": 1757556000000,
+  "source": "direct",
+  "error": null,
+  "orgs": [
+    { "uuid": "org-ent", "name": "Acme Corp", "usage": {
+        "five_hour": null, "seven_day": null, "seven_day_opus": null, "seven_day_sonnet": null,
+        "seven_day_cowork": null, "nimbus_quill": { "utilization": 0.0, "resets_at": null },
+        "extra_usage": { "is_enabled": true, "monthly_limit": 5000, "used_credits": 1250,
+          "utilization": 25.0, "currency": "USD", "decimal_places": 2 },
+        "limits": [], "member_dashboard_available": true } },
+    { "uuid": "org-21", "name": "Team Alpha", "usage": {
+        "five_hour": { "utilization": 50, "resets_at": "2026-09-11T03:00:00.119305+00:00" },
+        "seven_day": { "utilization": 49, "resets_at": "2026-09-15T07:00:00.119320+00:00" },
+        "extra_usage": { "is_enabled": false, "utilization": null },
+        "limits": [
+          { "kind": "session", "group": "session", "percent": 50, "severity": "normal",
+            "resets_at": "2026-09-11T03:00:00.247359+00:00", "scope": null, "is_active": false },
+          { "kind": "weekly_all", "group": "weekly", "percent": 49, "severity": "normal",
+            "resets_at": "2026-09-15T07:00:00.247379+00:00", "scope": null, "is_active": false },
+          { "kind": "weekly_scoped", "group": "weekly", "percent": 67, "severity": "normal",
+            "resets_at": "2026-09-15T07:00:00.247596+00:00",
+            "scope": { "model": { "id": null, "display_name": "Fable" }, "surface": null }, "is_active": true }
+        ] } },
+    { "uuid": "org-54", "name": "Team Beta", "usage": {
+        "extra_usage": null,
+        "limits": [
+          { "kind": "session", "group": "session", "percent": 10, "severity": "normal",
+            "resets_at": "2026-09-11T07:00:00.663520+00:00", "scope": null, "is_active": false },
+          { "kind": "weekly_all", "group": "weekly", "percent": 53, "severity": "normal",
+            "resets_at": "2026-09-13T09:00:00.663540+00:00", "scope": null, "is_active": false },
+          { "kind": "weekly_scoped", "group": "weekly", "percent": 76, "severity": "warning",
+            "resets_at": "2026-09-13T09:00:00.663560+00:00",
+            "scope": { "model": { "id": null, "display_name": "Fable" }, "surface": null }, "is_active": true }
+        ] } }
+  ]
+}

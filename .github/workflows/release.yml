@@ -1,0 +1,45 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Test
+        run: node test/run.mjs
+
+      - name: Check manifest version matches tag
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          manifest="$(jq -r .version manifest.json)"
+          if [ "$tag" != "$manifest" ]; then
+            echo "tag v$tag != manifest.json version $manifest" >&2
+            exit 1
+          fi
+
+      - name: Build store zip
+        run: |
+          name="usage-meter-for-claude-${GITHUB_REF_NAME}.zip"
+          zip -r "$name" manifest.json background.js lib.js popup.html popup.css popup.js LICENSE icons
+          unzip -l "$name"
+          echo "ZIP=$name" >> "$GITHUB_ENV"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "$ZIP" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes
