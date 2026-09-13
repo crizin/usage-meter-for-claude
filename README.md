@@ -31,8 +31,25 @@ The extension reads two endpoints using the claude.ai session cookie your browse
 
 | Endpoint | Purpose |
 | --- | --- |
-| `GET /api/organizations` | every organization on the account (uuid, name) |
+| `GET /api/organizations` | every organization on the account (uuid, name, capabilities) |
 | `GET /api/organizations/{uuid}/usage` | that organization's limits |
+
+### Which organizations are shown
+
+`/api/organizations` lists two kinds of organization, and only one of them has chat usage:
+
+| `capabilities` | Kind | Shown? |
+| --- | --- | --- |
+| contains `chat` (e.g. `["chat","claude_max"]`) | claude.ai organization | yes |
+| `["api"]` only | Claude Console organization (API keys, no chat) | no |
+
+Asking a Console organization for `/usage` answers `403 permission_error — Invalid authorization for
+organization`, so those are filtered out before the request is made rather than rendered as a failed
+card. The filter **fails open**: an organization with no `capabilities` array is kept, so a change to
+the payload shape can never empty the popup.
+
+An organization that still answers 401/403/404 is reported as "no usage access / no usage data" with
+the status attached, not as an error — only network faults and 5xx are.
 
 `usage.limits[]` carries the same values the settings page renders:
 

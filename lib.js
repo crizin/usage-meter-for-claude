@@ -2,6 +2,19 @@
 
 export const LEVELS = ['ok', 'warn', 'crit'];
 
+/**
+ * /api/organizations also lists Console (API-only) organizations, which have no chat usage at all —
+ * their /usage answers 403 permission_error. Keep only organizations that can actually have usage.
+ *
+ * Fails open: an organization with no capabilities array is kept, so a change to the payload shape
+ * can never empty the popup.
+ */
+export function hasChatUsage(org) {
+  const caps = org && org.capabilities;
+  if (!Array.isArray(caps) || !caps.length) return true;
+  return caps.includes('chat');
+}
+
 /** Map a percentage (plus the server's own severity hint) onto three levels. */
 export function levelFor(percent, severity) {
   let lv = percent >= 90 ? 'crit' : percent >= 70 ? 'warn' : 'ok';
@@ -119,9 +132,25 @@ export function badgeFor(orgs) {
   return { text: max === null ? '' : String(max), level };
 }
 
+/**
+ * An organization whose usage call failed -> how to present it.
+ * 401/403/404 mean "there is no usage to read here", a fact about the organization rather than a
+ * fault worth flagging in red. Anything else is a real failure.
+ */
+export function describeError(org) {
+  const status = Number(org && org.status) || null;
+  if (status === 401 || status === 403) {
+    return { level: 'muted', note: `No usage access for this organization (HTTP ${status})` };
+  }
+  if (status === 404) {
+    return { level: 'muted', note: 'No usage data for this organization (HTTP 404)' };
+  }
+  return { level: 'crit', note: `Couldn't load usage — ${(org && org.error) || 'unknown error'}` };
+}
+
 /** One-line summary for the tooltip */
 export function summarize(org) {
-  if (org.error) return "couldn't load";
+  if (org.error) return describeError(org).level === 'muted' ? 'no usage data' : "couldn't load";
   const { rows, credit } = normalizeOrg(org.usage);
   if (!rows.length) return credit ? `credits ${credit.percent}%` : 'no limit data';
   return rows.map((r) => `${r.label} ${r.percent}%`).join(' · ');

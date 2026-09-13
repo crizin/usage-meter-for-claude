@@ -1,5 +1,5 @@
 // Service worker: periodically collect every organization's usage, cache it, update the badge.
-import { badgeFor, summarize } from './lib.js';
+import { badgeFor, hasChatUsage, summarize } from './lib.js';
 
 const ORIGIN = 'https://claude.ai';
 const KEY = 'snapshot';
@@ -25,14 +25,14 @@ async function jsonDirect(path) {
 }
 
 async function collectDirect() {
-  const orgs = await jsonDirect('/api/organizations');
-  if (!Array.isArray(orgs)) throw new Error('BAD_SHAPE');
+  const all = await jsonDirect('/api/organizations');
+  if (!Array.isArray(all)) throw new Error('BAD_SHAPE');
   const out = [];
-  for (const o of orgs) {
+  for (const o of all.filter(hasChatUsage)) {
     try {
       out.push({ uuid: o.uuid, name: o.name, usage: await jsonDirect(`/api/organizations/${o.uuid}/usage`) });
     } catch (e) {
-      out.push({ uuid: o.uuid, name: o.name, error: String((e && e.message) || e) });
+      out.push({ uuid: o.uuid, name: o.name, error: String((e && e.message) || e), status: (e && e.status) || null });
     }
   }
   return out;
@@ -43,16 +43,20 @@ async function collectDirect() {
 async function pageCollector() {
   const j = async (p) => {
     const r = await fetch(p, { headers: { accept: 'application/json' } });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
+    if (!r.ok) { const e = new Error('HTTP ' + r.status); e.status = r.status; throw e; }
     return r.json();
   };
-  const orgs = await j('/api/organizations');
+  // Same rule as hasChatUsage() in lib.js, inlined because this function is serialized into the page.
+  const keep = (o) => {
+    const caps = o && o.capabilities;
+    return !Array.isArray(caps) || !caps.length || caps.includes('chat');
+  };
   const out = [];
-  for (const o of orgs) {
+  for (const o of (await j('/api/organizations')).filter(keep)) {
     try {
       out.push({ uuid: o.uuid, name: o.name, usage: await j('/api/organizations/' + o.uuid + '/usage') });
     } catch (e) {
-      out.push({ uuid: o.uuid, name: o.name, error: String((e && e.message) || e) });
+      out.push({ uuid: o.uuid, name: o.name, error: String((e && e.message) || e), status: (e && e.status) || null });
     }
   }
   return out;

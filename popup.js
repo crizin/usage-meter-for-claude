@@ -1,4 +1,4 @@
-import { normalizeOrg, formatReset, formatAgo } from './lib.js';
+import { normalizeOrg, describeError, formatReset, formatAgo } from './lib.js';
 
 const KEY = 'snapshot';
 const bodyEl = document.getElementById('body');
@@ -50,8 +50,9 @@ function renderOrg(org, now) {
   hd.append(el('span', 'org-name', org.name || 'Untitled organization'));
 
   if (org.error) {
-    hd.append(el('span', 'dot crit'));
-    card.append(hd, el('div', 'note', "Couldn't load usage for this organization"));
+    const { level, note } = describeError(org);
+    hd.append(el('span', `dot ${level}`));
+    card.append(hd, el('div', 'note', note));
     return card;
   }
 
