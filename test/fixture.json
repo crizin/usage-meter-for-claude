@@ -2,6 +2,11 @@
   "at": 1757556000000,
   "source": "direct",
   "error": null,
+  "orgList": [
+    { "uuid": "org-personal", "name": "Personal", "capabilities": ["chat", "claude_max"] },
+    { "uuid": "org-console", "name": "Console Workspace", "capabilities": ["api"] },
+    { "uuid": "org-legacy", "name": "No Capabilities Field" }
+  ],
   "orgs": [
     { "uuid": "org-ent", "name": "Acme Corp", "usage": {
         "five_hour": null, "seven_day": null, "seven_day_opus": null, "seven_day_sonnet": null,
@@ -32,6 +37,7 @@
           { "kind": "weekly_scoped", "group": "weekly", "percent": 76, "severity": "warning",
             "resets_at": "2026-09-13T09:00:00.663560+00:00",
             "scope": { "model": { "id": null, "display_name": "Fable" }, "surface": null }, "is_active": true }
-        ] } }
+        ] } },
+    { "uuid": "org-denied", "name": "Locked Down", "error": "HTTP 403", "status": 403 }
   ]
 }
