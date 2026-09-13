@@ -49,6 +49,10 @@ console.log('\nhasChatUsage - drop Console (API-only) organizations');
 eq('only chat orgs survive', snap.orgList.filter(hasChatUsage).map((o) => o.name),
   ['Personal', 'No Capabilities Field']);
 eq('chat org kept', hasChatUsage({ capabilities: ['chat', 'claude_max'] }), true);
+eq('team org kept', hasChatUsage({ capabilities: ['raven', 'chat'] }), true);
+eq('enterprise org kept', hasChatUsage({
+  capabilities: ['raven_enterprise', 'raven', 'chat', 'compliance_logging', 'compliance_api', 'analytics_api'],
+}), true);
 eq('api-only org dropped', hasChatUsage({ capabilities: ['api'] }), false);
 eq('missing capabilities -> fail open', hasChatUsage({ name: 'x' }), true);
 eq('empty capabilities -> fail open', hasChatUsage({ capabilities: [] }), true);
