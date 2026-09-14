@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Usage Meter for Claude",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "See 5-hour and weekly usage limits for every Claude organization in one view. Unofficial; not affiliated with Anthropic.",
   "permissions": [
     "storage",
