@@ -81,6 +81,6 @@ Display the current usage limits of the signed-in user's claude.ai organizations
 | Asset | File | Required by |
 | --- | --- | --- |
 | Icon 128×128 | `icons/icon128.png` | Chrome, Edge |
-| Screenshots 1280×800 | `store/screenshots/01-overview.png`, `02-dark.png`, `03-privacy.png` | Chrome (1–5), Edge (1–10) |
+| Screenshots 1280×800 | `store/screenshots/01-overview.png`, `02-dark.png`, `03-privacy.png`, `04-options.png` | Chrome (1–5), Edge (1–10) |
 | Small promo tile 440×280 | `store/promo-tile-440x280.png` | Chrome (optional) |
 | Privacy policy URL | host `store/PRIVACY.md` (GitHub raw or Pages) | Chrome, Edge |
