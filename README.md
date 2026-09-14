@@ -79,6 +79,7 @@ If both paths fail, the popup explains why (sign-in needed / no tab / network).
 
 - **Toolbar badge** — by default the **highest** figure across every organization and every limit. Amber at 70%, red at 90%. Hover for a per-organization summary.
 - **Popup** — one card per organization with 5-hour session, weekly all-models and weekly per-model bars, plus time until reset. Light and dark themes.
+- **Pace marker** — a thin line on each bar showing where steady use since the last reset would stand right now (the window is taken as 5 hours / 7 days ending at `resets_at`). Fill past the line means you're using it faster than an even pace; short of it means there's room to spare.
 - Refreshes every 2 minutes via `chrome.alarms`, and once more each time you open the popup.
 
 ### Choosing what the badge shows

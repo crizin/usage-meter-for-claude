@@ -49,11 +49,12 @@ body {
 .row-pct { font-size: 12px; font-weight: 650; font-variant-numeric: tabular-nums; }
 .row-pct.ok { color: var(--fg); } .row-pct.warn { color: var(--warn); } .row-pct.crit { color: var(--crit); }
 
-.bar { height: 5px; margin-top: 4px; border-radius: 3px; background: var(--track); overflow: hidden; }
+.bar { position: relative; height: 5px; margin-top: 4px; border-radius: 3px; background: var(--track); overflow: hidden; }
 .bar > i { display: block; height: 100%; border-radius: 3px; transition: width .35s ease; }
 .bar > i.lv-ok { background: var(--ok); }
 .bar > i.lv-warn { background: var(--warn); }
 .bar > i.lv-crit { background: var(--crit); }
+.bar > i.pace { position: absolute; top: 0; width: 2px; margin-left: -1px; border-radius: 0; background: var(--fg); opacity: .4; }
 
 .row-sub { margin-top: 3px; font-size: 10px; color: var(--muted); }
 

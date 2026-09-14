@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import {
-  normalizeOrg, formatReset, badgeFor, badgeScope, badgePrefs, BADGE_LIMITS,
+  normalizeOrg, formatReset, paceFor, badgeFor, badgeScope, badgePrefs, BADGE_LIMITS,
   summarize, levelFor, hasChatUsage, describeError,
 } from '../lib.js';
 
@@ -55,6 +55,16 @@ eq('1h 12m', formatReset('2026-09-11T03:00:00Z', base), 'resets in 1h 12m');
 eq('4d 5h', formatReset('2026-09-15T07:00:00Z', base), 'resets in 4d 5h');
 eq('past -> resetting now', formatReset('2026-09-10T00:00:00Z', base), 'resetting now');
 eq('null -> null', formatReset(null, base), null);
+
+console.log('\npaceFor - where steady use since the window opened would stand by now');
+eq('session, 1h 12m to go -> 76%', paceFor('2026-09-11T03:00:00Z', 'session', base), 76);
+eq('weekly, 4d 5h to go -> 40%', paceFor('2026-09-15T07:00:00Z', 'weekly', base), 40);
+eq('window just opened -> 0', paceFor('2026-09-11T06:48:00Z', 'session', base), 0);
+eq('reset time already passed -> 100', paceFor('2026-09-10T00:00:00Z', 'session', base), 100);
+eq('reset further away than the window -> 0', paceFor('2026-09-12T00:00:00Z', 'session', base), 0);
+eq('no reset time -> null', paceFor(null, 'session', base), null);
+eq('unknown group -> null', paceFor('2026-09-11T03:00:00Z', null, base), null);
+eq('normalized rows carry what it needs', t21.rows.map((r) => paceFor(r.resetsAt, r.group, base)), [76, 40, 40]);
 
 console.log('\nhasChatUsage - drop Console (API-only) organizations');
 eq('only chat orgs survive', snap.orgList.filter(hasChatUsage).map((o) => o.name),

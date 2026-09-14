@@ -127,6 +127,9 @@ de-duplicates concurrent calls through the `inFlight` promise.
   omits it — because the badge's `limit` filter keys on it.
 - `levelFor()` maps a percentage to `ok | warn | crit` (70 % / 90 %) and lets the server's `severity`
   raise it, never lower it.
+- `paceFor()` feeds the popup's pace marker: where steady use would stand now, assuming the window
+  opened `GROUP_WINDOW_MS` (5 h / 7 d by `group`) before `resets_at`. No reset time or an unknown
+  `group` gives `null`, and the marker is simply not drawn.
 
 The three level names are load-bearing across files: they are CSS class names in `popup.css`
 (`.dot.ok`, `.row-pct.warn`, `.bar > i.lv-crit`) and `options.css` (`.badge.crit`), keys of `BADGE_BG`

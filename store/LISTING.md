@@ -30,6 +30,7 @@ where you stand.
 WHAT YOU SEE
 • One card per organization: 5-hour session, weekly all-models, and weekly per-model limits
 • Time remaining until each limit resets
+• A pace marker on each bar: where steady use since the last reset would stand right now — past it, slow down; short of it, there's room
 • A toolbar badge with the highest figure across every organization — amber at 70%, red at 90%
 • Or pin the badge to one organization and to the 5-hour or weekly limit only — or hide it (Options)
 • Hover the badge for a per-organization summary

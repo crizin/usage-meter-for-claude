@@ -1,4 +1,4 @@
-import { normalizeOrg, describeError, formatReset, formatAgo } from './lib.js';
+import { normalizeOrg, describeError, formatReset, formatAgo, paceFor } from './lib.js';
 
 const KEY = 'snapshot';
 const bodyEl = document.getElementById('body');
@@ -24,7 +24,7 @@ function plural(n, one, many) {
   return `${n} ${n === 1 ? one : many}`;
 }
 
-function renderRow({ label, percent, level, resetsAt, active }, now, subOverride) {
+function renderRow({ label, percent, level, resetsAt, active, group }, now, subOverride) {
   const row = el('div', 'row' + (active ? ' row--active' : ''));
   const top = el('div', 'row-top');
   top.append(el('span', 'row-label', label), el('span', `row-pct ${level}`, `${percent}%`));
@@ -32,6 +32,13 @@ function renderRow({ label, percent, level, resetsAt, active }, now, subOverride
   const fill = el('i', `lv-${level}`);
   fill.style.width = `${Math.max(0, Math.min(100, percent))}%`;
   bar.append(fill);
+  const pace = paceFor(resetsAt, group, now);
+  if (pace != null) {
+    const mark = el('i', 'pace');
+    mark.style.left = `${pace}%`;
+    bar.append(mark);
+    bar.title = `At a steady pace since the last reset you'd be at ${pace}% now`;
+  }
   row.append(top, bar);
   const sub = subOverride || formatReset(resetsAt, now);
   if (sub) row.append(el('div', 'row-sub', sub));

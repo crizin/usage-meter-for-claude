@@ -108,6 +108,17 @@ export function formatReset(iso, now = Date.now()) {
   return `resets in ${mins}m`;
 }
 
+// A window opens on the first use after the previous one expired, so it started this long before resets_at.
+const GROUP_WINDOW_MS = { session: 5 * 3600e3, weekly: 7 * 86400e3 };
+
+/** Where steady use since the window opened would stand by now, as a percentage; null when unknowable */
+export function paceFor(resetsAt, group, now = Date.now()) {
+  const win = GROUP_WINDOW_MS[group];
+  const t = Date.parse(resetsAt);
+  if (!Number.isFinite(win) || !Number.isFinite(t)) return null;
+  return Math.round(Math.max(0, Math.min(100, 100 - ((t - now) / win) * 100)));
+}
+
 /** "just updated" / "3m ago" */
 export function formatAgo(ts, now = Date.now()) {
   if (!ts) return '—';
