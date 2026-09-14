@@ -32,7 +32,7 @@ jobs:
       - name: Build store zip
         run: |
           name="usage-meter-for-claude-${GITHUB_REF_NAME}.zip"
-          zip -r "$name" manifest.json background.js lib.js popup.html popup.css popup.js LICENSE icons
+          zip -r "$name" manifest.json background.js lib.js theme.css popup.html popup.css popup.js options.html options.css options.js LICENSE icons
           unzip -l "$name"
           echo "ZIP=$name" >> "$GITHUB_ENV"
 

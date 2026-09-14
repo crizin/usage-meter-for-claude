@@ -151,6 +151,10 @@ document.getElementById('open-settings').addEventListener('click', (e) => {
   e.preventDefault();
   chrome.tabs.create({ url: 'https://claude.ai/settings/usage' });
 });
+document.getElementById('open-options').addEventListener('click', (e) => {
+  e.preventDefault();
+  chrome.runtime.openOptionsPage();
+});
 
 // Paint the cache first, refresh immediately, then keep countdowns live while open.
 load().then(doRefresh);

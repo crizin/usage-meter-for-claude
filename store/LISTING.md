@@ -31,6 +31,7 @@ WHAT YOU SEE
 • One card per organization: 5-hour session, weekly all-models, and weekly per-model limits
 • Time remaining until each limit resets
 • A toolbar badge with the highest figure across every organization — amber at 70%, red at 90%
+• Or pin the badge to one organization and to the 5-hour or weekly limit only — or hide it (Options)
 • Hover the badge for a per-organization summary
 • Light and dark themes, following your browser
 
@@ -43,12 +44,12 @@ you have not opened in weeks still appears.
 PRIVACY
 • No analytics, no telemetry, no remote code, no developer-operated servers
 • The only network destination is https://claude.ai
-• Readings are cached in local browser storage and never leave your device
+• Readings and the badge setting are cached in local browser storage and never leave your device
 • The "tabs" permission is not requested, so the extension cannot see any tab other than claude.ai
 
 PERMISSIONS
 • https://claude.ai/* — read the two usage endpoints
-• storage — cache the last reading locally
+• storage — cache the last reading and the badge setting locally
 • alarms — refresh every two minutes
 • scripting — fall back to an open claude.ai tab when the direct request is blocked
 
@@ -69,7 +70,7 @@ Display the current usage limits of the signed-in user's claude.ai organizations
 | Field | Text |
 | --- | --- |
 | `host_permissions` | Reads https://claude.ai/api/organizations and .../usage to obtain the signed-in user's own usage limits. This is the only host the extension contacts. |
-| `storage` | Caches the most recent usage reading locally so the popup renders immediately and the toolbar badge survives a service-worker restart. |
+| `storage` | Caches the most recent usage reading locally so the popup renders immediately and the toolbar badge survives a service-worker restart, and stores the user's choice of what the badge shows. |
 | `alarms` | Schedules the two-minute background refresh that keeps the toolbar badge current. |
 | `scripting` | When the direct request from the service worker is blocked, the same two endpoints are read from an already-open claude.ai tab. No script is injected into any other site. |
 | Remote code | Not used. All JavaScript is contained in the package. |

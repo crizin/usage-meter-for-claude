@@ -1,6 +1,6 @@
 # Privacy Policy — Usage Meter for Claude
 
-_Last updated: 2026-09-11_
+_Last updated: 2026-09-14_
 
 ## Summary
 
@@ -19,7 +19,8 @@ The responses contain your organization names and your usage percentages with th
 
 ## What it stores
 
-The most recent response is cached in `chrome.storage.local` so the popup can render instantly.
+The most recent response is cached in `chrome.storage.local` so the popup can render instantly,
+alongside your choice of what the toolbar badge shows (an organization and a limit type).
 This data:
 
 - stays on your device,
@@ -41,7 +42,7 @@ This data:
 | Permission | Purpose |
 | --- | --- |
 | `host_permissions: https://claude.ai/*` | read the two usage endpoints above |
-| `storage` | cache the last reading on your device |
+| `storage` | cache the last reading and the badge setting on your device |
 | `alarms` | schedule a refresh every 2 minutes |
 | `scripting` | when the direct request is blocked, read the same endpoints from an open claude.ai tab |
 

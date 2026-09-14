@@ -1,8 +1,9 @@
 // Service worker: periodically collect every organization's usage, cache it, update the badge.
-import { badgeFor, hasChatUsage, summarize } from './lib.js';
+import { badgeFor, badgePrefs, badgeScope, hasChatUsage, summarize } from './lib.js';
 
 const ORIGIN = 'https://claude.ai';
 const KEY = 'snapshot';
+const PREFS = 'badge';
 const ALARM = 'refresh';
 const PERIOD_MIN = 2;
 const FETCH_TIMEOUT_MS = 10000;
@@ -101,17 +102,19 @@ async function refresh() {
       }
     }
     const snap = { at: Date.now(), orgs: orgs || [], source, error };
+    const store = await chrome.storage.local.get(PREFS);
     await chrome.storage.local.set({ [KEY]: snap });
-    updateBadge(snap);
+    updateBadge(snap, store[PREFS]);
     return snap;
   })();
   try { return await inFlight; } finally { inFlight = null; }
 }
 
-function updateBadge(snap) {
+function updateBadge(snap, prefs) {
   try { chrome.action.setBadgeTextColor({ color: '#ffffff' }); } catch (_) {}
+  const { show } = badgePrefs(prefs);
   if (snap.error || !snap.orgs.length) {
-    chrome.action.setBadgeText({ text: '!' });
+    chrome.action.setBadgeText({ text: show ? '!' : '' });
     chrome.action.setBadgeBackgroundColor({ color: '#6b7280' });
     chrome.action.setTitle({
       title: snap.error === 'LOGIN'
@@ -120,11 +123,20 @@ function updateBadge(snap) {
     });
     return;
   }
-  const { text, level } = badgeFor(snap.orgs);
+  const { text, level } = badgeFor(snap.orgs, prefs);
   chrome.action.setBadgeText({ text });
   chrome.action.setBadgeBackgroundColor({ color: BADGE_BG[level] || BADGE_BG.ok });
+  const scope = badgeScope(snap.orgs, prefs);
+  const head = !show ? 'Claude usage (badge hidden)'
+    : text ? `Claude usage (${scope} ${text}%)` : `Claude usage (${scope}: no data)`;
   const lines = snap.orgs.map((o) => `${o.name}: ${summarize(o)}`);
-  chrome.action.setTitle({ title: ['Claude usage (max ' + text + '%)', ...lines].join('\n') });
+  chrome.action.setTitle({ title: [head, ...lines].join('\n') });
+}
+
+// The options page changed what the badge shows: repaint from the cached snapshot, no refetch.
+async function repaint() {
+  const store = await chrome.storage.local.get([KEY, PREFS]);
+  if (store[KEY]) updateBadge(store[KEY], store[PREFS]);
 }
 
 function ensureAlarm() {
@@ -134,6 +146,7 @@ function ensureAlarm() {
 chrome.runtime.onInstalled.addListener(() => { ensureAlarm(); refresh(); });
 chrome.runtime.onStartup.addListener(() => { ensureAlarm(); refresh(); });
 chrome.alarms.onAlarm.addListener((a) => { if (a.name === ALARM) refresh(); });
+chrome.storage.onChanged.addListener((changes, area) => { if (area === 'local' && changes[PREFS]) repaint(); });
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg && msg.type === 'refresh') {

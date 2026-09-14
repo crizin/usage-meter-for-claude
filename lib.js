@@ -32,6 +32,7 @@ export function scopeLabel(scope) {
 }
 
 const KIND_LABEL = { session: '5-hour session', weekly_all: 'Weekly · all models' };
+const KIND_GROUP = { session: 'session', weekly_all: 'weekly', weekly_scoped: 'weekly' };
 
 // Fallback fields for organizations that return an empty limits[] (e.g. enterprise).
 const FALLBACK_FIELDS = [
@@ -60,7 +61,7 @@ export function normalizeOrg(usage) {
         resetsAt: l.resets_at || null,
         level: levelFor(pct, l.severity),
         active: !!l.is_active,
-        group: l.group || null,
+        group: l.group || KIND_GROUP[l.kind] || null,
       });
     }
   } else {
@@ -117,19 +118,55 @@ export function formatAgo(ts, now = Date.now()) {
   return `${Math.round(m / 60)}h ago`;
 }
 
-/** Highest limit across every organization -> toolbar badge */
-export function badgeFor(orgs) {
+/** Choices for the badge's limit filter: [value, label shown on the options page] */
+export const BADGE_LIMITS = [
+  ['all', 'Highest of all limits'],
+  ['session', '5-hour session only'],
+  ['weekly', 'Weekly limits only (highest of them)'],
+];
+const BADGE_LIMIT_SHORT = { all: 'max', session: '5-hour session', weekly: 'weekly' };
+
+/**
+ * Badge preferences as stored under chrome.storage.local `badge`:
+ * { show: boolean, org: 'all' | organization uuid, limit: 'all' | 'session' | 'weekly' }.
+ * Anything unrecognised falls back to the default, which is the old behaviour (max of everything).
+ */
+export function badgePrefs(raw) {
+  const show = !(raw && raw.show === false);
+  const org = raw && typeof raw.org === 'string' && raw.org ? raw.org : 'all';
+  const limit = raw && BADGE_LIMITS.some(([k]) => k === raw.limit) ? raw.limit : 'all';
+  return { show, org, limit };
+}
+
+/** Highest limit within the preferred scope -> toolbar badge; empty text when the badge is hidden */
+export function badgeFor(orgs, prefs) {
+  const { show, org, limit } = badgePrefs(prefs);
   let max = null, level = 'ok';
+  if (!show) return { text: '', level };
   for (const o of orgs || []) {
     if (!o || o.error) continue;
+    if (org !== 'all' && o.uuid !== org) continue;
     const { rows } = normalizeOrg(o.usage);
     for (const r of rows) {
+      if (limit !== 'all' && r.group !== limit) continue;
       if (max === null || r.percent > max) max = r.percent;
       if (r.level === 'crit') level = 'crit';
       else if (r.level === 'warn' && level === 'ok') level = 'warn';
     }
   }
   return { text: max === null ? '' : String(max), level };
+}
+
+/** What the badge figure is, e.g. "max" or "Team Alpha · 5-hour session" (tooltip + options page) */
+export function badgeScope(orgs, prefs) {
+  const { org, limit } = badgePrefs(prefs);
+  const parts = [];
+  if (org !== 'all') {
+    const hit = (orgs || []).find((o) => o && o.uuid === org);
+    parts.push(hit ? hit.name || 'Untitled organization' : 'unknown organization');
+  }
+  parts.push(BADGE_LIMIT_SHORT[limit]);
+  return parts.join(' · ');
 }
 
 /**

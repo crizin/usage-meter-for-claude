@@ -1,0 +1,28 @@
+/* Colour tokens shared by the popup and the options page. */
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1f1d1a;
+  --muted: #7b756c;
+  --line: #e8e4dd;
+  --card: #faf9f7;
+  --track: #ece8e1;
+  --ok: #2f9e5e;
+  --warn: #c2831f;
+  --crit: #b42318;
+  --accent: #c96442;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1f1e1c;
+    --fg: #f2efea;
+    --muted: #9b948a;
+    --line: #34322e;
+    --card: #292724;
+    --track: #3a3733;
+    --ok: #4ab77a;
+    --warn: #dba53c;
+    --crit: #e06a5c;
+    --accent: #d97757;
+  }
+}

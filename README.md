@@ -77,9 +77,24 @@ If both paths fail, the popup explains why (sign-in needed / no tab / network).
 
 ## What you see
 
-- **Toolbar badge** — the **highest** figure across every organization and every limit. Amber at 70%, red at 90%. Hover for a per-organization summary.
+- **Toolbar badge** — by default the **highest** figure across every organization and every limit. Amber at 70%, red at 90%. Hover for a per-organization summary.
 - **Popup** — one card per organization with 5-hour session, weekly all-models and weekly per-model bars, plus time until reset. Light and dark themes.
 - Refreshes every 2 minutes via `chrome.alarms`, and once more each time you open the popup.
+
+### Choosing what the badge shows
+
+Open the options page (the **Badge options** link at the bottom of the popup, or right-click the
+toolbar icon → **Options**) and pick:
+
+| Setting | Choices |
+| --- | --- |
+| Show a figure on the toolbar badge | on / off — off leaves the icon bare (no figure, no `!`), the popup and tooltip keep working |
+| Organization | all organizations, or one of them |
+| Limit | highest of all limits · 5-hour session only · weekly limits only (the highest of `weekly_all` and the per-model weekly limits) |
+
+The badge is the highest figure inside that scope; its colour follows the same figure. The options
+page previews the badge as you change the setting, and the tooltip names the scope
+(`Claude usage (Team Alpha · 5-hour session 50%)`). The popup always lists everything regardless.
 
 ## Permissions and privacy
 
@@ -88,7 +103,7 @@ This is the complete list of what it asks for:
 | Permission | Why |
 | --- | --- |
 | `host_permissions: https://claude.ai/*` | read the two usage endpoints |
-| `storage` | cache the last reading locally |
+| `storage` | cache the last reading and the badge setting locally |
 | `alarms` | refresh every 2 minutes |
 | `scripting` | fall back to an open claude.ai tab when the direct call is blocked |
 
@@ -97,15 +112,17 @@ permission alone, which means the extension **cannot see the URL of any tab othe
 
 - The only outbound request is to `https://claude.ai`. No analytics, no telemetry, no remote code.
 - No credentials are collected; it reuses the session cookie already in the browser.
-- Readings stay in `chrome.storage.local` and never leave the device.
+- Readings and the badge setting stay in `chrome.storage.local` and never leave the device.
 
 ## Layout
 
 ```
 manifest.json    MV3 configuration
 background.js    collection + badge (service worker)
-lib.js           payload normalization / formatters (shared by background and popup)
+lib.js           payload normalization / formatters / badge rules (shared by background, popup, options)
+theme.css        colour tokens shared by the popup and the options page
 popup.html/.css/.js
+options.html/.css/.js   what the badge shows (organization × limit)
 icons/
 store/           listing copy, privacy policy, screenshots
 test/            fixture.json + run.mjs  ->  node test/run.mjs
@@ -113,9 +130,9 @@ test/            fixture.json + run.mjs  ->  node test/run.mjs
 
 ## Customizing
 
+- What the badge shows: the options page (see above)
 - Refresh interval: `PERIOD_MIN` in `background.js`
 - Warning thresholds: `levelFor()` in `lib.js` (70% / 90% by default)
-- To badge only the 5-hour session, add an `r.group === 'session'` filter in `badgeFor()` in `lib.js`
 
 ## Caveat
 

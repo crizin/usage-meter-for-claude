@@ -5,7 +5,8 @@ This file provides guidance to AI coding agents (Claude Code, Codex, and others)
 ## What this is
 
 A Manifest V3 browser extension (Chrome / Edge) that shows the 5-hour and weekly usage limits of every
-organization on a claude.ai account in one popup, with the highest percentage on the toolbar badge.
+organization on a claude.ai account in one popup, with the highest percentage on the toolbar badge
+(or, via the options page, the highest within one organization and/or one limit type).
 It reads two **internal, undocumented** claude.ai endpoints (`/api/organizations` and
 `/api/organizations/{uuid}/usage`) using the browser's existing session cookie. Unofficial; the payload
 shape can change without notice, which is why the code is written to fail open (see below).
@@ -24,7 +25,7 @@ node test/run.mjs            # the only test command (Node 22+; CI runs the same
   Add new assertions to `test/run.mjs`; add new payload shapes to `test/fixture.json`.
 - There is no lint or build step. Manual testing = load the repo folder unpacked at
   `chrome://extensions` (Developer mode → Load unpacked), then hit the extension's reload button after
-  editing `background.js` (the popup picks up changes on reopen).
+  editing `background.js` (the popup and options page pick up changes on reopen).
 
 ### Releasing
 
@@ -40,17 +41,21 @@ stylesheet, icon dir), you must also add it to the `zip -r` line in `release.yml
 
 ## Architecture
 
-Three runtime contexts share one pure module:
+Four runtime contexts share one pure module:
 
 | File | Context | Role |
 | --- | --- | --- |
 | `background.js` | MV3 service worker (module) | collects usage, writes the snapshot to `chrome.storage.local`, paints the badge |
 | `popup.js` / `popup.html` / `popup.css` | popup page | renders the cached snapshot, asks the worker to refresh |
-| `lib.js` | imported by **both** of the above **and** by `test/run.mjs` in Node | payload normalization, level mapping, formatters, badge/summary computation |
+| `options.js` / `options.html` / `options.css` | options page (embedded in `chrome://extensions`) | edits the `badge` preference, previews the badge from the cached snapshot |
+| `lib.js` | imported by **all** of the above **and** by `test/run.mjs` in Node | payload normalization, level mapping, formatters, badge/summary computation |
+
+`theme.css` holds the colour tokens (`--ok`, `--warn`, `--crit`, …) and is linked by both pages before
+their own stylesheet.
 
 **`lib.js` must stay pure**: no `chrome.*`, no DOM, no side effects. That is the only reason the test
 suite runs in Node with no browser or mocking. Anything that touches an extension API belongs in
-`background.js` or `popup.js`.
+`background.js`, `popup.js` or `options.js`.
 
 ### The snapshot — the contract between worker and popup
 
@@ -77,6 +82,24 @@ response used by the `hasChatUsage` tests). Two failure tiers are deliberate:
   access" note via `describeError()`; only network faults and 5xx are red. Errored orgs never reach the
   badge (`badgeFor` skips them).
 
+### The badge preference — the contract between options page and worker
+
+`options.js` writes one object under `chrome.storage.local` key `badge`; `background.js` reads it on
+every refresh and repaints from the cached snapshot whenever it changes (`chrome.storage.onChanged`):
+
+```js
+{ show: true, org: 'all' | '<organization uuid>', limit: 'all' | 'session' | 'weekly' }
+```
+
+`badgePrefs()` in `lib.js` sanitizes it — a missing key, an unknown `limit`, or a non-string `org`
+all collapse to `{ show: true, org: 'all', limit: 'all' }`, which is the original behaviour (max of
+everything). `badgeFor(orgs, prefs)` filters organizations by `uuid` and rows by `row.group`;
+`badgeScope()` turns the same prefs into the tooltip/preview label. A scope that matches no row
+yields an empty badge, not a fallback to another figure. The `limit` choices and their labels live in
+`BADGE_LIMITS`; `weekly` deliberately covers `weekly_all` **and** `weekly_scoped` (hitting either one
+blocks). `show: false` blanks the badge entirely — `updateBadge()` also drops the `!` error marker
+then — while `org`/`limit` stay stored so re-enabling restores the previous choice.
+
 ### Collection: two-step fallback in `background.js`
 
 1. `collectDirect()` — `fetch` from the service worker with `credentials: 'include'`. Works with no
@@ -99,19 +122,22 @@ de-duplicates concurrent calls through the `inFlight` promise.
   so a payload change can never empty the popup.
 - `normalizeOrg()` prefers `usage.limits[]` (kind `session` / `weekly_all` / `weekly_scoped`). When
   `limits[]` is empty (enterprise orgs) it falls back to the flat `five_hour` / `seven_day*` fields in
-  `FALLBACK_FIELDS`. `extra_usage` becomes a separate `credit` object.
+  `FALLBACK_FIELDS`. `extra_usage` becomes a separate `credit` object. Every row carries a `group`
+  (`session` / `weekly`) — taken from the payload, derived from `kind` via `KIND_GROUP` when the payload
+  omits it — because the badge's `limit` filter keys on it.
 - `levelFor()` maps a percentage to `ok | warn | crit` (70 % / 90 %) and lets the server's `severity`
   raise it, never lower it.
 
 The three level names are load-bearing across files: they are CSS class names in `popup.css`
-(`.dot.ok`, `.row-pct.warn`, `.bar > i.lv-crit`), keys of `BADGE_BG` in `background.js`, and the
-`LEVELS` export. `describeError()` additionally emits `muted`, which exists only as a `.dot` class.
-Adding a level means touching all of them.
+(`.dot.ok`, `.row-pct.warn`, `.bar > i.lv-crit`) and `options.css` (`.badge.crit`), keys of `BADGE_BG`
+in `background.js`, and the `LEVELS` export. `describeError()` additionally emits `muted`, which exists
+only as a `.dot` class. Adding a level means touching all of them.
 
 ## Conventions
 
 - Permissions are a deliberate minimum (`storage`, `alarms`, `scripting`, host `https://claude.ai/*`;
   **no** `tabs`). If they change, update the permission tables in `README.md`, `store/LISTING.md`, and
-  `store/PRIVACY.md` alongside `manifest.json`.
+  `store/PRIVACY.md` alongside `manifest.json`. Preferences stay in `chrome.storage.local`, not
+  `sync` — the privacy policy promises nothing leaves the device.
 - `store/` holds paste-ready store listing copy and screenshots; it is not packaged into the release zip.
 - Commit messages use short conventional prefixes: `fix:`, `test:`, `chore:`, `ci:`.
