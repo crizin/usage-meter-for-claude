@@ -83,7 +83,7 @@ Display the current usage limits of the signed-in user's claude.ai organizations
 | --- | --- | --- |
 | Store icon 128×128 | `store/store-logo-128x128.png` | Chrome |
 | Store logo 300×300 | `store/store-logo-300x300.png` | Edge |
-| Screenshots 1280×800 | `store/screenshots/01-overview.png`, `02-dark.png`, `03-privacy.png`, `04-options.png` | Chrome (1–5), Edge (1–10) |
+| Screenshots 1280×800 | `store/screenshots/01-overview.png`, `02-dark.png`, `03-privacy.png`, `04-options.png`, `05-pace.png` | Chrome (1–5), Edge (1–10) |
 | Small promo tile 440×280 | `store/promo-tile-440x280.png` | Chrome (optional) |
 | Marquee promo tile 1400×560 | `store/promo-marquee-1400x560.png` | Chrome (optional, only shown if featured) |
 | Privacy policy URL | host `store/PRIVACY.md` (GitHub raw or Pages) | Chrome, Edge |
