@@ -83,7 +83,68 @@ Display the current usage limits of the signed-in user's claude.ai organizations
 | --- | --- | --- |
 | Store icon 128×128 | `store/store-logo-128x128.png` | Chrome |
 | Store logo 300×300 | `store/store-logo-300x300.png` | Edge |
-| Screenshots 1280×800 | `store/screenshots/01-overview.png`, `02-dark.png`, `03-privacy.png`, `04-options.png`, `05-pace.png` | Chrome (1–5), Edge (1–10) |
+| Screenshots 1280×800 | `store/screenshots/01-overview.png`, `02-dark.png`, `03-privacy.png`, `04-options.png`, `05-pace.png` | Chrome (1–5), Edge (1–6) |
 | Small promo tile 440×280 | `store/promo-tile-440x280.png` | Chrome (optional) |
 | Marquee promo tile 1400×560 | `store/promo-marquee-1400x560.png` | Chrome (optional, only shown if featured) |
 | Privacy policy URL | host `store/PRIVACY.md` (GitHub raw or Pages) | Chrome, Edge |
+
+## Search terms (Edge, optional — max 7 terms, 30 chars each, 21 words total)
+
+```
+claude
+claude usage
+usage limit
+rate limit
+anthropic
+claude.ai
+quota
+```
+
+## Notes for certification (Edge, "Submit your extension" page)
+
+```
+This extension shows the usage limits (5-hour session and weekly) of every claude.ai
+organization the signed-in user belongs to. It does nothing useful without a claude.ai session,
+so please test with a claude.ai account (a free account is sufficient). No test credentials are
+supplied because claude.ai accounts are personal and cannot be shared.
+
+TO TEST
+1. Sign in at https://claude.ai in the same browser profile.
+2. Click the extension's toolbar icon. The popup lists one card per organization with usage bars
+   and the time until each limit resets. The toolbar badge shows the highest percentage
+   (amber from 70%, red from 90%).
+3. Click "Badge options" at the bottom of the popup (or right-click the icon > Extension options)
+   to pin the badge to one organization and/or one limit type, or to hide the badge figure.
+4. Without a claude.ai session the popup shows "Sign in required" with an "Open claude.ai" button;
+   this is expected.
+
+BEHAVIOUR
+- The only host contacted is https://claude.ai: GET /api/organizations and
+  GET /api/organizations/{uuid}/usage, using the session cookie already in the browser.
+- Nothing is collected or transmitted. The last reading and the badge preference are cached in
+  chrome.storage.local and never leave the device.
+- No remote code. No content scripts are declared; the "scripting" permission is used only as a
+  fallback to run the same two requests inside an already open claude.ai tab when the direct
+  request from the service worker is blocked.
+- A background alarm refreshes the reading every 2 minutes.
+- Unofficial; not affiliated with Anthropic. Source: https://github.com/crizin/usage-meter-for-claude
+```
+
+## Chrome listing identity (Developer Dashboard)
+
+| Field | Value |
+| --- | --- |
+| Item ID | `jlohkbicmcebjejobahelcfbdmhjfdie` |
+| Listing URL | `https://chromewebstore.google.com/detail/usage-meter-for-claude/jlohkbicmcebjejobahelcfbdmhjfdie` |
+
+Updates: Developer Dashboard → the item → **Package** → upload the new release zip → **Submit for review**.
+
+## Edge listing identity (Partner Center → Extension overview)
+
+| Field | Value |
+| --- | --- |
+| Store ID | `0RDCKDJQT7NT` |
+| CRX ID | `jehigijhkenldhnbflmkpjefmgjdpgnm` |
+| Listing URL | `https://microsoftedge.microsoft.com/addons/detail/jehigijhkenldhnbflmkpjefmgjdpgnm` |
+
+Updates: Partner Center → the extension → **Packages** → upload the new release zip → **Publish**. Every version is re-certified.

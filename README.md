@@ -11,8 +11,8 @@ and reload the settings page to find out where you stand.
 
 ### From a store
 
-- Chrome Web Store: _(add link after publishing)_
-- Microsoft Edge Add-ons: _(add link after publishing)_
+- [Chrome Web Store](https://chromewebstore.google.com/detail/usage-meter-for-claude/jlohkbicmcebjejobahelcfbdmhjfdie)
+- [Microsoft Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/jehigijhkenldhnbflmkpjefmgjdpgnm)
 
 ### From source (unpacked)
 
